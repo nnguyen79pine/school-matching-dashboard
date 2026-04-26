@@ -83,12 +83,13 @@
 </header>
 
 <section>
+
   <div class="card">
     <h2>Project Overview</h2>
     <p>
       EducatEd Choice helps families compare schools using data-driven insights.
-      The project analyzes school-level academic performance, stability, mobility,
-      and school structure to support better school matching recommendations.
+      Instead of looking at one metric at a time, this project combines multiple
+      academic and structural factors to create a clearer picture of school quality.
     </p>
   </div>
 
@@ -110,53 +111,92 @@
   </div>
 
   <div class="card">
-    <h2>Data Processing and Model</h2>
+    <h2>Data Processing and Data Model</h2>
     <p>
-      The datasets were cleaned, standardized, and combined into a school-level
-      dataset. Key columns include graduation rate, SAT score, HOPE eligibility,
+      Data from multiple sources was cleaned and standardized by removing duplicates,
+      handling missing values, and aligning column formats.
+    </p>
+
+    <p>
+      The final dataset includes key school-level features such as:
+      graduation rate, SAT total score, HOPE eligibility percentage,
       cohort size, mobility rate, mobility count, and discipline percentage.
-      PCA was used to reduce these variables into meaningful matching dimensions.
+    </p>
+
+    <p>
+      These variables were used in Principal Component Analysis (PCA) to create
+      two main dimensions: <b>academic performance</b> and <b>school stability</b>.
+      These dimensions power the school matching system.
     </p>
   </div>
 
   <div class="card">
     <h2>Result 1: School Matching Map</h2>
     <p>
-      The PCA map groups schools based on academic performance and stability.
-      This helps translate complex school data into a simple matching view for families.
+      This visualization groups schools based on academic performance and stability.
+      It transforms complex data into an easy-to-understand map that helps families
+      quickly identify strong school matches.
     </p>
-    <img src="images/scatter-plot.png" alt="School Matching PCA Scatter Plot">
+    <img src="images/scatter-plot.png" alt="PCA Scatter Plot">
   </div>
 
   <div class="card">
     <h2>Result 2: Key Drivers of School Differences</h2>
     <p>
-      This chart shows that school differences are shaped by academic performance,
-      school structure, and school scale. This supports the matching system because
-      school choice should consider more than test scores alone.
+      This chart shows which factors have the strongest influence on how schools differ.
+      Academic performance, school structure, and school size all contribute to how
+      schools are grouped, supporting a more balanced matching system.
     </p>
-    <img src="images/key-drivers.png" alt="Key Drivers of School Differences">
+    <img src="images/key-drivers.png" alt="Key Drivers">
   </div>
 
   <div class="card">
     <h2>Result 3: Explained Variance</h2>
     <p>
-      The explained variance chart shows how much information each PCA component captures.
-      PC1 captures the largest pattern, making it useful for comparing schools.
+      This chart shows how much information each PCA component captures.
+      The first component explains the largest share of differences between schools,
+      making it a strong summary for comparison.
     </p>
-    <img src="images/explained-variance.png" alt="Explained Variance Chart">
+    <img src="images/explained-variance.png" alt="Explained Variance">
   </div>
 
   <div class="card">
     <h2>Interactive Dashboard</h2>
     <p>
-      The live dashboard allows users to explore schools interactively through
-      the school matching map, PCA analysis, and dataset overview.
+      The dashboard allows users to explore schools interactively and see how they compare
+      across performance and stability dimensions.
     </p>
     <a class="button" href="https://school-matching-dashboard-dpiz4r2jsevpoemtybt6j7.streamlit.app/" target="_blank">
       Open Dashboard
     </a>
   </div>
+
+  <div class="card">
+    <h2>Project Links</h2>
+
+    <p>
+      <strong>Dashboard:</strong><br>
+      <a href="https://school-matching-dashboard-dpiz4r2jsevpoemtybt6j7.streamlit.app/" target="_blank">
+        View Live Dashboard
+      </a>
+    </p>
+
+    <p>
+      <strong>GitHub Repository:</strong><br>
+      <a href="YOUR_GITHUB_REPO_LINK_HERE" target="_blank">
+        View Project Repository
+      </a>
+    </p>
+
+    <p>
+      <strong>Notebook:</strong><br>
+      <a href="YOUR_NOTEBOOK_LINK_HERE" target="_blank">
+        View Analysis Notebook
+      </a>
+    </p>
+
+  </div>
+
 </section>
 
 <footer>
