@@ -4,28 +4,55 @@ import plotly.express as px
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
+# -------------------------
+# PAGE CONFIG
+# -------------------------
 st.set_page_config(page_title="EducatEd Choice Dashboard", layout="wide")
 
+# -------------------------
+# STYLE
+# -------------------------
 st.markdown("""
 <style>
-.main-title {font-size: 44px; font-weight: 800; color: #1f2a44; margin-bottom: 5px;}
-.subtitle {font-size: 18px; color: #5f6b7a; margin-bottom: 30px;}
-.card {background-color: #f8fafc; padding: 22px; border-radius: 16px; border: 1px solid #e5e7eb; margin-bottom: 20px;}
-.section-title {font-size: 24px; font-weight: 700; color: #1f2a44; margin-top: 15px;}
+.main-title {font-size: 42px; font-weight: 800; color: #1f2a44;}
+.subtitle {font-size: 17px; color: #5f6b7a; margin-bottom: 25px;}
+.card {
+    background-color: #f8fafc;
+    padding: 20px;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+}
+.section-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-top: 20px;
+}
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">EducatEd Choice Dashboard</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Interactive school matching dashboard based on academic performance and stability.</div>', unsafe_allow_html=True)
+# -------------------------
+# HEADER
+# -------------------------
+st.markdown('<div class="main-title">EducatEd Choice: School Matching Dashboard</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Helping families find the best-fit school using data-driven insights.</div>', unsafe_allow_html=True)
 
+# -------------------------
+# LOAD DATA
+# -------------------------
 df = pd.read_csv("master_school_table_v5_2023_24.csv")
 
-st.sidebar.title("Dashboard Menu")
+# -------------------------
+# SIDEBAR
+# -------------------------
+st.sidebar.title("Navigation")
 view = st.sidebar.radio(
-    "Select View",
-    ["School Matching Map", "Dataset Overview", "PCA Insights"]
+    "Select Section",
+    ["School Matching Map", "Key Relationships", "PCA Insights", "Dataset"]
 )
 
+# -------------------------
+# PCA PREP
+# -------------------------
 features = [
     "grad_rate", "cohort_size", "sat_total", "mobility_rate",
     "mobility_count", "discipline_percent", "hope_eligible_percent"
@@ -45,6 +72,9 @@ pca_df["sat_total"] = df["sat_total"]
 pca_df["hope_eligible_percent"] = df["hope_eligible_percent"]
 pca_df["mobility_rate"] = df["mobility_rate"]
 
+# -------------------------
+# PROFILE CLASSIFICATION
+# -------------------------
 def assign_profile(row):
     if row["PC1"] >= 0 and row["PC2"] >= 0:
         return "High Performance + Stable"
@@ -56,13 +86,21 @@ def assign_profile(row):
 
 pca_df["school_profile"] = pca_df.apply(assign_profile, axis=1)
 
+# -------------------------
+# METRICS (TOP CARDS)
+# -------------------------
 col1, col2, col3, col4 = st.columns(4)
+
 col1.metric("Total Schools", f"{len(df):,}")
 col2.metric("Avg Graduation Rate", f"{df['grad_rate'].mean():.1f}%")
-col3.metric("Avg SAT", f"{df['sat_total'].mean():.0f}")
+col3.metric("Avg SAT Score", f"{df['sat_total'].mean():.0f}")
 col4.metric("Avg Mobility Rate", f"{df['mobility_rate'].mean():.1f}%")
 
+# =====================================================
+# 1️⃣ SCHOOL MATCHING MAP
+# =====================================================
 if view == "School Matching Map":
+
     st.markdown('<div class="section-title">School Matching Map</div>', unsafe_allow_html=True)
 
     fig = px.scatter(
@@ -82,93 +120,89 @@ if view == "School Matching Map":
         },
         labels={
             "PC1": "Academic Performance",
-            "PC2": "Stability / Structure",
-            "grad_rate": "Graduation Rate",
-            "school_profile": "Profile",
-            "sat_total": "SAT Total",
-            "hope_eligible_percent": "HOPE Eligible (%)",
-            "mobility_rate": "Mobility Rate (%)"
+            "PC2": "Stability",
+            "grad_rate": "Graduation Rate"
         },
         color_continuous_scale="Viridis",
-        opacity=0.82
+        opacity=0.8
     )
 
-    fig.add_hline(y=0, line_dash="dash", line_color="gray")
-    fig.add_vline(x=0, line_dash="dash", line_color="gray")
+    # Quadrant lines
+    fig.add_hline(y=0, line_dash="dash")
+    fig.add_vline(x=0, line_dash="dash")
+
     fig.update_traces(marker=dict(size=8, line=dict(width=0.5, color="white")))
-    fig.update_layout(
-        height=620,
-        margin=dict(l=20, r=20, t=40, b=20),
-        template="plotly_white",
-        coloraxis_colorbar=dict(title="Graduation<br>Rate")
-    )
 
     st.plotly_chart(fig, use_container_width=True)
 
-    left, right = st.columns([1.2, 1])
+    st.markdown("""
+    <div class="card">
+    • PC1 represents academic performance (higher = stronger outcomes)<br>
+    • PC2 represents school stability (higher = more stable)<br>
+    • Schools in the top-right quadrant are the best overall matches
+    </div>
+    """, unsafe_allow_html=True)
 
-    with left:
-        st.markdown('<div class="section-title">How to Read This Map</div>', unsafe_allow_html=True)
-        st.markdown("""
-        <div class="card">
-        <b>Academic Performance</b> is shown on the horizontal axis. Schools farther right tend to perform stronger academically.<br><br>
-        <b>Stability / Structure</b> is shown on the vertical axis. Schools higher on the map tend to show stronger stability patterns.<br><br>
-        The top-right area represents schools that combine stronger performance with stronger stability.
-        </div>
-        """, unsafe_allow_html=True)
+# =====================================================
+# 2️⃣ KEY RELATIONSHIP (REQUIREMENT PLOT #2)
+# =====================================================
+elif view == "Key Relationships":
 
-    with right:
-        st.markdown('<div class="section-title">Key Insights</div>', unsafe_allow_html=True)
-        st.markdown("""
-        <div class="card">
-        • PC1 captures the main academic performance pattern.<br>
-        • PC2 highlights stability and structural differences.<br>
-        • This map helps connect parent priorities to school profiles.
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Graduation Rate vs HOPE Eligibility</div>', unsafe_allow_html=True)
 
-elif view == "Dataset Overview":
-    st.markdown('<div class="section-title">Dataset Overview</div>', unsafe_allow_html=True)
+    fig2 = px.scatter(
+        df,
+        x="hope_eligible_percent",
+        y="grad_rate",
+        trendline="ols",
+        labels={
+            "hope_eligible_percent": "HOPE Eligibility (%)",
+            "grad_rate": "Graduation Rate (%)"
+        }
+    )
+
+    st.plotly_chart(fig2, use_container_width=True)
 
     st.markdown("""
     <div class="card">
-    This view shows the main school-level dataset used for the dashboard and PCA analysis.
-    The dataset includes academic performance, school size, mobility, discipline, and HOPE eligibility variables.
+    There is a clear positive relationship between HOPE eligibility and graduation rate.  
+    This suggests academic readiness and performance are strongly connected.
     </div>
     """, unsafe_allow_html=True)
+
+# =====================================================
+# 3️⃣ PCA INSIGHTS (REQUIREMENT PLOT #3)
+# =====================================================
+elif view == "PCA Insights":
+
+    st.markdown('<div class="section-title">Explained Variance (PCA)</div>', unsafe_allow_html=True)
+
+    explained_var = pca.explained_variance_ratio_
+
+    var_df = pd.DataFrame({
+        "Component": [f"PC{i+1}" for i in range(len(explained_var))],
+        "Variance": explained_var
+    })
+
+    fig3 = px.bar(var_df, x="Component", y="Variance")
+
+    st.plotly_chart(fig3, use_container_width=True)
+
+    st.markdown("""
+    <div class="card">
+    PCA reduces many variables into key dimensions.  
+    PC1 explains the largest portion of variation (~40%), meaning it captures the most important academic patterns.
+    </div>
+    """, unsafe_allow_html=True)
+
+# =====================================================
+# 4️⃣ DATASET
+# =====================================================
+elif view == "Dataset":
+
+    st.markdown('<div class="section-title">Dataset Overview</div>', unsafe_allow_html=True)
 
     st.write("Rows:", df.shape[0])
     st.write("Columns:", df.shape[1])
+
     st.dataframe(df.head(50), use_container_width=True)
-
-elif view == "PCA Insights":
-    st.markdown('<div class="section-title">PCA Insights</div>', unsafe_allow_html=True)
-
-    explained_var = pca.explained_variance_ratio_
-    variance_df = pd.DataFrame({
-        "Principal Component": [f"PC{i+1}" for i in range(len(explained_var))],
-        "Variance Explained": explained_var
-    })
-
-    fig_var = px.bar(
-        variance_df.head(5),
-        x="Principal Component",
-        y="Variance Explained",
-        title="Explained Variance by Principal Component",
-        text_auto=".1%"
-    )
-
-    fig_var.update_layout(
-        yaxis_tickformat=".0%",
-        height=500,
-        template="plotly_white"
-    )
-
-    st.plotly_chart(fig_var, use_container_width=True)
-
-    st.markdown("""
-    <div class="card">
-    PCA reduces several school variables into a smaller set of dimensions.
-    PC1 represents the main academic performance pattern, while PC2 captures stability and structural differences.
-    </div>
-    """, unsafe_allow_html=True)
