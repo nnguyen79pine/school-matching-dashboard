@@ -42,15 +42,6 @@
       color: #1f2a44;
     }
 
-    img {
-      width: 100%;
-      max-width: 850px;
-      display: block;
-      margin: 20px auto;
-      border-radius: 12px;
-      border: 1px solid #ddd;
-    }
-
     a {
       color: #2563eb;
       font-weight: bold;
@@ -71,6 +62,59 @@
       padding: 25px;
       background: #1f2a44;
       color: white;
+    }
+
+    /* ===== DASHBOARD STYLE ===== */
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      margin-top: 25px;
+    }
+
+    @media (min-width: 900px) {
+      .dashboard-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .visual-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .visual-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.14);
+    }
+
+    .visual-card img {
+      width: 100%;
+      height: 230px;
+      object-fit: contain;
+      background: #f8fafc;
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .visual-card-content {
+      padding: 18px;
+    }
+
+    .visual-card-content h3 {
+      margin-top: 0;
+      color: #1f2a44;
+      font-size: 20px;
+    }
+
+    .visual-card-content p {
+      font-size: 15px;
+      color: #4b5563;
     }
   </style>
 </head>
@@ -102,208 +146,68 @@
   <div class="card">
     <h2>Datasets</h2>
     <ul>
-      <li><a href="https://gosa.georgia.gov/dashboards-data-report-card/downloadable-data" target="_blank">Georgia Department of Education / GOSA Data</a></li>
-      <li><a href="https://georgiainsights.gadoe.org/data-downloads/" target="_blank">Georgia Insights Data Portal</a></li>
-      <li><a href="https://nces.ed.gov/ccd/files.asp" target="_blank">NCES Public School Data</a></li>
-      <li><a href="https://www.usnews.com/education" target="_blank">U.S. News School Data</a></li>
-      <li><a href="https://www.gcpsk12.org" target="_blank">Gwinnett County Public Schools</a></li>
+      <li><a href="https://gosa.georgia.gov/dashboards-data-report-card/downloadable-data" target="_blank">GOSA Data</a></li>
+      <li><a href="https://georgiainsights.gadoe.org/data-downloads/" target="_blank">Georgia Insights</a></li>
+      <li><a href="https://nces.ed.gov/ccd/files.asp" target="_blank">NCES</a></li>
     </ul>
   </div>
 
   <div class="card">
-    <h2>Data Processing and Data Model</h2>
+    <h2>Data Processing</h2>
     <p>
-      Data from multiple sources was cleaned and standardized by removing duplicates,
-      handling missing values, and aligning column formats.
-    </p>
-
-    <p>
-      The final dataset includes key school-level features such as:
-      graduation rate, SAT total score, HOPE eligibility percentage,
-      cohort size, mobility rate, mobility count, and discipline percentage.
-    </p>
-
-    <p>
-      These variables were used in Principal Component Analysis (PCA) to create
-      two main dimensions: <b>academic performance</b> and <b>school stability</b>.
-      These dimensions power the school matching system.
+      Data was cleaned, standardized, and combined into a master dataset.
+      PCA was used to reduce complexity and identify key dimensions:
+      <b>academic performance</b> and <b>school stability</b>.
     </p>
   </div>
 
+  <!-- DASHBOARD SECTION -->
   <div class="card">
-    <h2>Result 1: School Matching Map</h2>
+    <h2>School Matching Visual Insights</h2>
     <p>
-      This visualization groups schools based on academic performance and stability.
-      It transforms complex data into an easy-to-understand map that helps families
-      quickly identify strong school matches.
+      These dashboard-style visuals summarize key findings from our analysis.
     </p>
-    <img src="images/scatter-plot.png" alt="PCA Scatter Plot">
+
+    <div class="dashboard-grid">
+
+      <div class="visual-card">
+        <img src="images/scatter-plot.png" alt="School Matching Map">
+        <div class="visual-card-content">
+          <h3>School Matching Map</h3>
+          <p>
+            Schools are grouped based on performance and stability using PCA.
+          </p>
+        </div>
+      </div>
+
+      <div class="visual-card">
+        <img src="images/key-drivers.png" alt="Key Drivers">
+        <div class="visual-card-content">
+          <h3>Key Drivers</h3>
+          <p>
+            Shows which variables most influence school differences.
+          </p>
+        </div>
+      </div>
+
+      <div class="visual-card">
+        <img src="images/explained-variance.png" alt="Explained Variance">
+        <div class="visual-card-content">
+          <h3>Explained Variance</h3>
+          <p>
+            Displays how much information each PCA component captures.
+          </p>
+        </div>
+      </div>
+
+    </div>
   </div>
-
-  <div class="card">
-    <h2>Result 2: Key Drivers of School Differences</h2>
-    <p>
-      This chart shows which factors have the strongest influence on how schools differ.
-      Academic performance, school structure, and school size all contribute to how
-      schools are grouped, supporting a more balanced matching system.
-    </p>
-    <img src="images/key-drivers.png" alt="Key Drivers">
-  </div>
-
-  <div class="card">
-  <h2>Bonus D3.js Chart: PCA Variance Explained</h2>
-  <p>
-    This chart shows how much information each principal component captures.
-    PC1 explains the largest share, meaning it captures the most important
-    academic performance pattern used in our school matching system.
-  </p>
-
-  <div id="d3-chart"></div>
-</div>
-
-<script src="https://d3js.org/d3.v7.min.js"></script>
-
-<script>
-const data = [
-  { component: "PC1", variance: 39.9 },
-  { component: "PC2", variance: 17.2 },
-  { component: "PC3", variance: 15.0 },
-  { component: "PC4", variance: 12.5 },
-  { component: "PC5", variance: 8.5 }
-];
-
-const margin = { top: 40, right: 30, bottom: 60, left: 70 };
-const width = 750 - margin.left - margin.right;
-const height = 420 - margin.top - margin.bottom;
-
-const svg = d3.select("#d3-chart")
-  .append("svg")
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-  .attr("transform", `translate(${margin.left},${margin.top})`);
-
-// Gradient
-const defs = svg.append("defs");
-const gradient = defs.append("linearGradient")
-  .attr("id", "bar-gradient")
-  .attr("x1", "0%")
-  .attr("y1", "0%")
-  .attr("x2", "0%")
-  .attr("y2", "100%");
-
-gradient.append("stop")
-  .attr("offset", "0%")
-  .attr("stop-color", "#3b82f6");
-
-gradient.append("stop")
-  .attr("offset", "100%")
-  .attr("stop-color", "#1e3a8a");
-
-// Scales
-const x = d3.scaleBand()
-  .domain(data.map(d => d.component))
-  .range([0, width])
-  .padding(0.3);
-
-const y = d3.scaleLinear()
-  .domain([0, d3.max(data, d => d.variance) + 5])
-  .range([height, 0]);
-
-// Gridlines
-svg.append("g")
-  .attr("class", "grid")
-  .call(d3.axisLeft(y)
-    .tickSize(-width)
-    .tickFormat(""))
-  .attr("color", "#e5e7eb");
-
-// Axes
-svg.append("g")
-  .attr("transform", `translate(0,${height})`)
-  .call(d3.axisBottom(x))
-  .selectAll("text")
-  .style("font-size", "13px");
-
-svg.append("g")
-  .call(d3.axisLeft(y).tickFormat(d => d + "%"))
-  .selectAll("text")
-  .style("font-size", "13px");
-
-// Bars with animation
-svg.selectAll("rect")
-  .data(data)
-  .enter()
-  .append("rect")
-  .attr("x", d => x(d.component))
-  .attr("width", x.bandwidth())
-  .attr("y", height)
-  .attr("height", 0)
-  .attr("rx", 6)
-  .attr("fill", "url(#bar-gradient)")
-  .transition()
-  .duration(800)
-  .attr("y", d => y(d.variance))
-  .attr("height", d => height - y(d.variance));
-
-// Value labels
-svg.selectAll(".label")
-  .data(data)
-  .enter()
-  .append("text")
-  .attr("x", d => x(d.component) + x.bandwidth() / 2)
-  .attr("y", d => y(d.variance) - 10)
-  .attr("text-anchor", "middle")
-  .style("font-size", "13px")
-  .style("font-weight", "600")
-  .style("fill", "#1f2a44")
-  .text(d => d.variance + "%");
-
-// Title inside chart
-svg.append("text")
-  .attr("x", width / 2)
-  .attr("y", -10)
-  .attr("text-anchor", "middle")
-  .style("font-size", "16px")
-  .style("font-weight", "700")
-  .text("Explained Variance by PCA Components");
-</script>
 
   <div class="card">
     <h2>Interactive Dashboard</h2>
-    <p>
-      The dashboard allows users to explore schools interactively and see how they compare
-      across performance and stability dimensions.
-    </p>
     <a class="button" href="https://school-matching-dashboard-dpiz4r2jsevpoemtybt6j7.streamlit.app/" target="_blank">
       Open Dashboard
     </a>
-  </div>
-
-  <div class="card">
-    <h2>Project Links</h2>
-
-    <p>
-      <strong>Dashboard:</strong><br>
-      <a href="https://school-matching-dashboard-dpiz4r2jsevpoemtybt6j7.streamlit.app/" target="_blank">
-        View Live Dashboard
-      </a>
-    </p>
-
-    <p>
-      <strong>GitHub Repository:</strong><br>
-      <a href="YOUR_GITHUB_REPO_LINK_HERE" target="_blank">
-        View Project Repository
-      </a>
-    </p>
-
-    <p>
-      <strong>Notebook:</strong><br>
-      <a href="YOUR_NOTEBOOK_LINK_HERE" target="_blank">
-        View Analysis Notebook
-      </a>
-    </p>
-
   </div>
 
 </section>
