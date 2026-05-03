@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
@@ -361,6 +362,131 @@ if view == "Dashboard":
         )
         st.plotly_chart(fig_var, use_container_width=True)
 
+    # =========================
+    # KEY RELATIONSHIPS
+    # =========================
+    st.markdown('<div class="section-title">Key Relationships</div>', unsafe_allow_html=True)
+
+    scatter_col, bar_col = st.columns(2)
+
+    with scatter_col:
+        # Exclude structural outlier: schools with mobility > 30% are alternative programs
+        # with fundamentally different student populations that skew the trend line
+        scatter_data = pca_df[pca_df["mobility_rate"] < 30].copy()
+
+        fit = np.polyfit(scatter_data["mobility_rate"], scatter_data["grad_rate"], 1)
+        x_line = np.linspace(
+            scatter_data["mobility_rate"].min(),
+            scatter_data["mobility_rate"].max(),
+            100
+        )
+        y_line = np.polyval(fit, x_line)
+
+        fig_scatter = px.scatter(
+            scatter_data,
+            x="mobility_rate",
+            y="grad_rate",
+            hover_name="school_name",
+            hover_data={
+                "mobility_rate": ":.1f",
+                "grad_rate": ":.1f",
+            },
+            color="grad_rate",
+            color_continuous_scale="Blues",
+            labels={
+                "mobility_rate": "Mobility Rate (%)",
+                "grad_rate": "Graduation Rate (%)",
+            },
+            title="Mobility Rate vs. Graduation Rate (r = −0.72)",
+            opacity=0.88,
+        )
+        fig_scatter.add_scatter(
+            x=x_line,
+            y=y_line,
+            mode="lines",
+            line=dict(color="#f59e0b", width=2.5, dash="dash"),
+            name="Trend",
+            showlegend=True,
+        )
+        fig_scatter.update_traces(
+            selector=dict(mode="markers"),
+            marker=dict(size=10, line=dict(width=0.8, color="white"))
+        )
+        fig_scatter.update_layout(
+            height=460,
+            template="plotly_white",
+            paper_bgcolor="#ffffff",
+            plot_bgcolor="#ffffff",
+            font=dict(color="#111827"),
+            title_font=dict(size=16, color="#111827"),
+            coloraxis_showscale=False,
+            legend=dict(orientation="h", y=-0.18),
+            margin=dict(l=40, r=20, t=60, b=50),
+        )
+        st.plotly_chart(fig_scatter, use_container_width=True)
+
+    with bar_col:
+        # Split schools at median for each metric, compare avg outcomes across groups
+        med_mob  = pca_df["mobility_rate"].median()
+        med_grad = pca_df["grad_rate"].median()
+        med_hope = pca_df["hope_eligible_percent"].median()
+
+        subgroups = {
+            "High Mobility":  pca_df[pca_df["mobility_rate"]          >= med_mob],
+            "Low Mobility":   pca_df[pca_df["mobility_rate"]          <  med_mob],
+            "High Grad Rate": pca_df[pca_df["grad_rate"]              >= med_grad],
+            "Low Grad Rate":  pca_df[pca_df["grad_rate"]              <  med_grad],
+            "High HOPE":      pca_df[pca_df["hope_eligible_percent"]  >= med_hope],
+            "Low HOPE":       pca_df[pca_df["hope_eligible_percent"]  <  med_hope],
+        }
+
+        bar_rows = []
+        for label, subset in subgroups.items():
+            bar_rows.append({
+                "Subgroup": label,
+                "Metric":   "Avg Grad Rate %",
+                "Value":    round(subset["grad_rate"].mean(), 1),
+            })
+            bar_rows.append({
+                "Subgroup": label,
+                "Metric":   "Avg HOPE Elig %",
+                "Value":    round(subset["hope_eligible_percent"].mean(), 1),
+            })
+
+        bar_df = pd.DataFrame(bar_rows)
+
+        fig_bar = px.bar(
+            bar_df,
+            x="Subgroup",
+            y="Value",
+            color="Metric",
+            barmode="group",
+            title="Avg Outcomes by Subgroup (split at median)",
+            text="Value",
+            color_discrete_map={
+                "Avg Grad Rate %": "#38bdf8",
+                "Avg HOPE Elig %": "#fb923c",
+            },
+        )
+        fig_bar.update_traces(
+            textposition="outside",
+            textfont=dict(size=10, color="#111827"),
+            marker_line_width=0,
+        )
+        fig_bar.update_layout(
+            height=460,
+            template="plotly_white",
+            paper_bgcolor="#ffffff",
+            plot_bgcolor="#ffffff",
+            font=dict(color="#111827"),
+            title_font=dict(size=16, color="#111827"),
+            yaxis=dict(title="Percentage (%)", range=[0, 115]),
+            xaxis=dict(title=""),
+            legend=dict(title="", orientation="h", y=-0.2),
+            margin=dict(l=20, r=20, t=60, b=70),
+        )
+        st.plotly_chart(fig_bar, use_container_width=True)
+
     st.markdown("""
     <div class="info-card">
         <b>How to read this dashboard:</b><br><br>
@@ -368,6 +494,10 @@ if view == "Dashboard":
         academic performance and school stability/structure. Schools closer together have more similar profiles, while schools farther apart
         have more different patterns. The driver chart explains which variables influence the map the most, and the explained variance chart
         shows how much information PCA keeps from the original dataset.
+        The Mobility vs. Graduation Rate scatter plot shows how student turnover relates to graduation outcomes.
+        Hover over any dot to see the school name and values, and use the dashed trend line to read the overall direction.
+        The Subgroup Comparison chart splits schools at the median for each metric and compares average graduation rate and HOPE eligibility side by side,
+        making it easy to see how much outcomes differ between groups.
     </div>
     """, unsafe_allow_html=True)
 
