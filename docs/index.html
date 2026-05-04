@@ -269,6 +269,104 @@ svg.append("text")
   .text("Explained Variance by PCA Components");
 </script>
 
+  <!-- STATISTICAL ANALYSIS -->
+
+  <div class="card">
+    <h2>Statistical Analysis</h2>
+    <p>
+      To understand what actually drives school performance in Gwinnett County,
+      we ran a full statistical analysis across both the NCES and USNews datasets.
+      The goal was to move beyond surface-level comparisons and identify which
+      factors are genuinely connected to outcomes like graduation rate, SAT scores,
+      and HOPE eligibility.
+    </p>
+    <p>
+      <strong>Note on outlier exclusion:</strong> One school in the dataset, McClure Health HS,
+      an alternative school serving students who have left traditional high schools,
+      was excluded from all analyses below. This school had a mobility rate of
+      <b>48.8%</b> (the district average is 6.4%) and a graduation rate of
+      <b>52.7%</b>, both extreme outliers relative to every other school in the
+      district. Including it would distort correlations, averages, and distributions
+      in ways that do not reflect the typical Gwinnett high school experience.
+      Because this school serves a fundamentally different student population under
+      a different operational model, comparing it directly to comprehensive high
+      schools would be statistically misleading.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Correlation Matrix</h2>
+    <p>
+      The correlation matrix below shows the pairwise relationships between all
+      key numeric variables across matched schools. Values close to 1 or −1
+      indicate a strong relationship; values near 0 suggest little to no
+      linear association.
+    </p>
+    <p>
+      Several relationships stood out. Mobility rate and graduation rate had one of
+      the strongest correlations in the dataset at <b>r = −0.72</b>, meaning schools
+      with high student turnover consistently had lower graduation rates. Disadvantaged
+      percentage was strongly negatively correlated with both math proficiency
+      (<b>r = −0.72</b>) and SAT total (<b>r = −0.78</b>), confirming that
+      socioeconomic factors are closely tied to academic outcomes. Interestingly,
+      discipline percentage was positively correlated with graduation rate
+      (<b>r = 0.58</b>), the opposite of what was initially hypothesized, likely
+      because larger, higher-performing schools generate more discipline incidents
+      by sheer volume.
+    </p>
+    <img src="images/correlation_matrix.png" alt="Correlation Matrix">
+
+  <div class="card">
+    <h2>Mobility Rate vs. Graduation Rate</h2>
+    <p>
+      The scatter plot below isolates the mobility-graduation relationship. Schools
+      with low mobility rates (under 7%) clustered tightly in the 90–99% graduation
+      range, while schools with higher mobility were spread much lower.
+    </p>
+    <p>
+      This suggests that student stability is one of the most important predictors
+      of whether students actually finish high school. It also raises questions about
+      what is driving high mobility at certain schools and whether targeted intervention could close that gap.
+    </p>
+    <img src="images/mobility_graduation.png" alt="Mobility Rate vs. Graduation Rate Scatter Plot">
+  </div>
+
+  <div class="card">
+    <h2>Key Metric Comparisons by Subgroup</h2>
+    <p>
+      We split schools into subgroups based on their median values for graduation
+      rate, mobility rate, and HOPE eligibility, then compared average outcomes
+      across groups. The chart below shows average graduation rate and HOPE
+      eligibility side by side for each subgroup.
+    </p>
+    <p>
+      Schools in the high graduation rate group averaged noticeably higher HOPE
+      eligibility than low graduation rate schools. The high mobility group had
+      the lowest HOPE eligibility of any subgroup, reinforcing that mobility
+      affects not just graduation but college readiness as well.
+    </p>
+    <img src="images/average_metrics.png" alt="Average Metrics by Subgroup">
+  </div>
+
+  <div class="card">
+    <h2>Distribution Analysis</h2>
+    <p>
+      Understanding the shape of each metric's distribution matters for
+      interpreting averages correctly. The histograms below show graduation rate,
+      SAT total, HOPE eligibility, and mobility rate across the 23 schools
+      included in the analysis.
+    </p>
+    <p>
+      Graduation rate and SAT total are both left-skewed, with most schools
+      clustered at higher values and a small number of underperformers pulling
+      the mean down. Mobility rate is right-skewed, making the median a more
+      honest summary statistic than the mean for that metric.
+    </p>
+    <img src="images/distributions.png" alt="Distribution of Key Metrics">
+  </div>
+
+  <!-- END STATISTICAL ANALYSIS -->
+  
   <div class="card">
     <h2>Interactive Dashboard</h2>
     <p>
